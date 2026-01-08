@@ -33,6 +33,7 @@ interface ServerConfig {
   command: string;
   args: string[];
   path?: string;
+  env?: Record<string, string>;
 }
 
 interface GatewayConfig {
@@ -87,7 +88,7 @@ async function getOrCreateSession(sessionId: string, serverName: string, config:
   const stdioTransport = new StdioClientTransport({
     command: config.command,
     args: config.args,
-    env: process.env as Record<string, string>
+    env: { ...process.env, ...config.env } as Record<string, string>
   });
 
   await stdioTransport.start();
@@ -207,7 +208,7 @@ class MCPGateway {
           const stdioTransport = new StdioClientTransport({
             command: serverConfig.command,
             args: serverConfig.args,
-            env: process.env as Record<string, string>,
+            env: { ...process.env, ...serverConfig.env } as Record<string, string>,
           });
 
           // Create SSE transport with just the path portion
@@ -443,7 +444,7 @@ async function dumpSchemas(config: GatewayConfig, format: 'json' | 'yaml') {
     const stdio = new StdioClientTransport({
       command: serverConfig.command,
       args: serverConfig.args,
-      env: process.env as Record<string, string>
+      env: { ...process.env, ...serverConfig.env } as Record<string, string>
     });
     await stdio.start();
 
